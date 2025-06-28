@@ -1,23 +1,20 @@
 import './App.css'
 import Button from "./components/Buttons/Button.jsx";
 import {useEffect, useState} from "react";
-import pullAllPokeMon, {pullSpecificPokeMon} from "./helpers/apiScripts.js";
+import pullAllPokeMon from "./helpers/apiScripts.js";
 import Pokemon from "./components/PokemonCard/Pokemon.jsx";
 
 function App() {
     const [pokeIndex, setPokeIndex] = useState("");
-    const [pokeData, setPokeData] = useState("");
+    const [pokeLink, setPokeLink] = useState("https://pokeapi.co/api/v2/pokemon");
     const [error, setError] = useState("");
     const [loading, toggleLoading] = useState(false);
-    const pokeLink = "https://pokeapi.co/api/v2/pokemon/1/";
 
     useEffect(() => {
-        pullAllPokeMon(setError, setPokeIndex, toggleLoading);
-        /*pullSpecificPokeMon(setError, setPokeData, toggleLoading, pokeLink);*/
-    }, []);
+        pullAllPokeMon(setError, setPokeIndex, toggleLoading, pokeLink)
+    }, [pokeLink]);
 
-    console.log(pokeIndex);
-    console.log(pokeData);
+    console.log(pokeLink);
 
     return (
     <>
@@ -27,30 +24,29 @@ function App() {
             <Button
                 buttonType={"button"}
                 name={"Previous"}
-                isDisabled={loading === true}
-                action={() => pullSpecificPokeMon(setError, setPokeData, toggleLoading, pokeLink)}
+                isDisabled={loading === true || pokeIndex.previous === null}
+                action={() => setPokeLink(pokeIndex.previous)}
             />
             <Button
                 buttonType={"button"}
                 name={"next"}
-                isDisabled={loading === true}
-                action={() => pullSpecificPokeMon(setError, setPokeData, toggleLoading, pokeLink)}
+                isDisabled={loading === true || pokeIndex.next === null}
+                action={() =>setPokeLink(pokeIndex.next)}
             />
             </span>
         </header>
         <main>
-            {pokeData &&
-                <Pokemon
-                    name={pokeData.name}
-                    img={pokeData.sprites.front_default}
-                    moves={pokeData.moves.length}
-                    weight={pokeData.weight}
-                    abilities={pokeData.abilities}
-                />}
-
+            {loading && <h3>loading...</h3>}
+            {error && <h3>{error}</h3>}
+            <section className="pokemon-collection">
+            {Object.keys(pokeIndex).length > 0 &&
+                    pokeIndex.results.map((pokemon, index) => {
+                            return (
+                                <Pokemon key={index} url={pokemon.url} />
+                            )})}
+            </section>
         </main>
     </>
-)
-}
+)}
 
 export default App
