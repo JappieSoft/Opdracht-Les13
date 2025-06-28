@@ -12,8 +12,6 @@ function Button({buttonType, name, isDisabled, action}) {
     )
 }
 
-
-
 export default Button
 
 

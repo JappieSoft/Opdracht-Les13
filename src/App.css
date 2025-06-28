@@ -8,6 +8,12 @@ body {
     background-color: gold;
 }
 
+header{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .page-controls{
     display: flex;
 }
@@ -15,5 +21,6 @@ body {
 .pokemon-collection{
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 1em;
 }

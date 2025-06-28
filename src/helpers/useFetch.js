@@ -1,29 +1,31 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
 
-
 function useFetch(url){
-
     const [data,setData] = useState("")
     const [error,setError] = useState("")
-    const [loading,setLoading] = useState(false)
+    const [loading,toggleLoading] = useState(false)
 
     useEffect(() => {
+        const controller = new AbortController();
         (
             async function(){
+                toggleLoading(true);
                 try{
-                    setLoading(true)
                     const response = await axios.get(url,{
-                        limit: 20,})
+                        signal: controller.signal,})
                     /*console.log(response)*/
                     setData(response.data)
                 }catch(err){
                     setError(err)
                 }finally{
-                    setLoading(false)
+                    toggleLoading(false)
                 }
             }
         )()
+        return function cleanup() {
+            controller.abort();
+        }
     }, [url])
 
     return { data, error, loading }

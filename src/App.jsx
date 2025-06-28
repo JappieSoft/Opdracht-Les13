@@ -1,8 +1,8 @@
 import './App.css'
 import Button from "./components/Buttons/Button.jsx";
 import {useEffect, useState} from "react";
-import pullAllPokeMon from "./helpers/apiScripts.js";
 import Pokemon from "./components/PokemonCard/Pokemon.jsx";
+import axios from "axios";
 
 function App() {
     const [pokeIndex, setPokeIndex] = useState("");
@@ -11,7 +11,27 @@ function App() {
     const [loading, toggleLoading] = useState(false);
 
     useEffect(() => {
-        pullAllPokeMon(setError, setPokeIndex, toggleLoading, pokeLink)
+        const controller = new AbortController();
+
+        async function pullAllPokeMon() {
+            setError("");
+            toggleLoading(true);
+            try {
+                const response = await axios.get(pokeLink,{
+                    signal: controller.signal,})
+                setPokeIndex(response.data)
+            } catch (err) {
+                console.error(err);
+                setError("Er ging iets fout gegaan bij het ophalen van de data.");
+            } finally {
+                toggleLoading(false);
+            }
+        }
+        pullAllPokeMon();
+
+        return function cleanup() {
+            controller.abort();
+        }
     }, [pokeLink]);
 
     console.log(pokeLink);
@@ -35,16 +55,14 @@ function App() {
             />
             </span>
         </header>
-        <main>
-            {loading && <h3>loading...</h3>}
-            {error && <h3>{error}</h3>}
-            <section className="pokemon-collection">
+        <main className="pokemon-collection">
+            {loading && <h3>Finding Pokemon!</h3>}
+            {error && <h3>They are hiding, we are unable to find them!</h3>}
             {Object.keys(pokeIndex).length > 0 &&
                     pokeIndex.results.map((pokemon, index) => {
                             return (
                                 <Pokemon key={index} url={pokemon.url} />
                             )})}
-            </section>
         </main>
     </>
 )}
